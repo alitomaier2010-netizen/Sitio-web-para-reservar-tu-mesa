@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Non Stop · Reservá tu mesa</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <h1 class="hero__title">¿Querés reservar tu mesa?</h1>
+    <p class="hero__subtitle">Elegí tu mesa en el mapa y mirá la info al instante</p>
+  </header>
+
+  <main class="mapa-wrap">
+    <div class="mapa" id="mapa">
+      <svg class="mapa__svg" viewBox="0 0 635 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Plano del piso de Non Stop">
+        <defs>
+          <linearGradient id="floorGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#23252f" />
+            <stop offset="55%" stop-color="#16171f" />
+            <stop offset="100%" stop-color="#0c0d13" />
+          </linearGradient>
+          <radialGradient id="stageGlow" cx="50%" cy="15%" r="85%">
+            <stop offset="0%" stop-color="#5865ff" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#5865ff" stop-opacity="0" />
+          </radialGradient>
+          <filter id="floorShadow" x="-30%" y="-30%" width="160%" height="160%">
+            <feDropShadow dx="0" dy="8" stdDeviation="18" flood-color="#000" flood-opacity="0.55" />
+          </filter>
+        </defs>
+
+        <!-- silueta general del piso -->
+        <path class="piso__silueta" filter="url(#floorShadow)" fill="url(#floorGrad)" stroke="rgba(255,255,255,0.16)" stroke-width="1.5"
+          d="M 234.7 269.8 Q 238.0 240.0 268.0 240.0 L 380.0 240.0 Q 410.0 240.0 412.2 269.9 L 445.5 715.2 Q 450.0 775.0 390.0 775.0 L 238.0 775.0 Q 178.0 775.0 184.7 715.4 Z" />
+
+        <!-- pantalla / escenario -->
+        <path fill="#0a0a10" stroke="rgba(255,255,255,0.14)" stroke-width="1.2"
+          d="M 260.6 177.7 Q 263.0 168.0 273.0 168.0 L 357.0 168.0 Q 367.0 168.0 369.4 177.7 L 381.6 226.3 Q 384.0 236.0 374.0 236.0 L 256.0 236.0 Q 246.0 236.0 248.4 226.3 Z" />
+        <rect x="238" y="166" width="150" height="75" fill="url(#stageGlow)" />
+        <text x="313" y="205" class="piso__label piso__label--stage">NON STOP</text>
+
+        <!-- paneles por sector -->
+        <rect class="piso__panel piso__panel--vip" x="228" y="305" width="24" height="52" rx="8" />
+        <rect class="piso__panel piso__panel--vip" x="275" y="300" width="115" height="58" rx="12" />
+        <rect class="piso__panel piso__panel--vip" x="415" y="298" width="30" height="84" rx="8" />
+        <rect class="piso__panel" x="255" y="355" width="170" height="80" rx="12" />
+        <rect class="piso__panel" x="260" y="435" width="145" height="100" rx="12" />
+        <rect class="piso__panel" x="185" y="435" width="43" height="135" rx="10" />
+        <rect class="piso__panel" x="428" y="438" width="30" height="137" rx="10" />
+        <rect class="piso__panel piso__panel--vip" x="215" y="575" width="177" height="93" rx="14" />
+        <rect class="piso__panel piso__panel--barra" x="215" y="678" width="177" height="16" rx="5" />
+
+        <!-- etiquetas de sector -->
+        <text x="322" y="255" class="piso__label">ESCENARIO</text>
+        <text x="240" y="335" class="piso__label piso__label--vert" transform="rotate(-90 240 335)">CORRALITO</text>
+        <text x="332" y="315" class="piso__label piso__label--sub">VIP · BURBUJA</text>
+        <text x="430" y="345" class="piso__label piso__label--vert" transform="rotate(-90 430 345)">GRADAS</text>
+        <text x="340" y="368" class="piso__label piso__label--sub">ULTRA VIP</text>
+        <text x="206" y="507" class="piso__label piso__label--vert" transform="rotate(-90 206 507)">BALCÓN LAUCHA</text>
+        <text x="443" y="510" class="piso__label piso__label--vert" transform="rotate(90 443 510)">BALCÓN</text>
+        <text x="303" y="626" class="piso__label piso__label--sub">VIP SUITE</text>
+        <text x="303" y="690" class="piso__label piso__label--small">BARRA</text>
+        <text x="303" y="738" class="piso__label piso__label--big">PLATEA</text>
+      </svg>
+      <div class="mapa__hotspots" id="hotspots"></div>
+    </div>
+
+    <button id="calibrarBtn" class="calibrar-btn" title="Modo edición de posiciones">⚙</button>
+  </main>
+
+  <section class="info-mesa" id="info-mesa">
+    <div class="info-mesa__content" id="infoMesaContent">
+      <p class="info-mesa__placeholder">Elegí una mesa en el mapa para ver toda la información acá.</p>
+    </div>
+  </section>
+
+  <script src="data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

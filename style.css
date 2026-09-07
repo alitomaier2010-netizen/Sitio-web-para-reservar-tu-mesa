@@ -54,72 +54,28 @@ body {
   position: relative;
   max-width: 680px;
   width: 100%;
-  padding: 2rem 0;
-  background:
-    radial-gradient(ellipse 60% 40% at 28% 18%, rgba(88, 101, 255, 0.28), transparent 60%),
-    radial-gradient(ellipse 55% 45% at 75% 82%, rgba(150, 70, 220, 0.22), transparent 60%),
-    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(30, 20, 60, 0.35), transparent 70%);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 3%,
+    #000 97%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 3%,
+    #000 97%,
+    transparent 100%
+  );
 }
 
-.mapa__svg {
+.mapa__img {
   display: block;
   width: 100%;
   height: auto;
   user-select: none;
-}
-
-.piso__panel {
-  fill: rgba(255, 255, 255, 0.035);
-  stroke: rgba(255, 255, 255, 0.12);
-  stroke-width: 1;
-}
-
-.piso__panel--vip {
-  stroke: rgba(212, 175, 106, 0.35);
-  fill: rgba(212, 175, 106, 0.045);
-}
-
-.piso__panel--barra {
-  fill: rgba(255, 255, 255, 0.05);
-  stroke: rgba(255, 255, 255, 0.16);
-}
-
-.piso__label {
-  fill: rgba(244, 244, 248, 0.5);
-  font-family: "Segoe UI", system-ui, sans-serif;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-anchor: middle;
-  text-transform: uppercase;
-}
-
-.piso__label--stage {
-  fill: rgba(244, 244, 248, 0.75);
-  font-size: 15px;
-  letter-spacing: 0.1em;
-  font-style: italic;
-}
-
-.piso__label--sub {
-  fill: rgba(212, 175, 106, 0.75);
-  font-size: 10.5px;
-}
-
-.piso__label--vert {
-  font-size: 9.5px;
-  fill: rgba(244, 244, 248, 0.4);
-}
-
-.piso__label--small {
-  font-size: 9px;
-  fill: rgba(244, 244, 248, 0.4);
-}
-
-.piso__label--big {
-  font-size: 15px;
-  fill: rgba(244, 244, 248, 0.4);
-  letter-spacing: 0.2em;
+  -webkit-user-drag: none;
 }
 
 .mapa__hotspots {
@@ -220,11 +176,6 @@ body {
   display: none;
 }
 
-.hotspot.is-dragging {
-  outline: 2px dashed #fff;
-  z-index: 5;
-}
-
 @keyframes hotspot-pop {
   0% {
     transform: translate(-50%, -50%) scale(0.6);
@@ -235,25 +186,6 @@ body {
   100% {
     transform: translate(-50%, -50%) scale(1);
   }
-}
-
-.calibrar-btn {
-  position: absolute;
-  top: 0;
-  right: 1rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--text);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  width: 34px;
-  height: 34px;
-  cursor: pointer;
-  font-size: 1rem;
-}
-
-.calibrar-btn.is-active {
-  background: var(--accent);
-  border-color: var(--accent-light);
 }
 
 .info-mesa {

@@ -120,30 +120,90 @@ const POSICIONES = {
 
 const PUBLICA_UNICA = { nombre: "Aramis", instagram: "ara.nonstop" };
 
+// Precios por día. "full" = precio único, sin consumo mínimo separado.
+const PRECIOS = {
+  Escenario: { full: true, viernes: { precio: 1300000 }, sabado: { precio: 1500000 } },
+  Backstage: { full: true, viernes: { precio: 1000000 }, sabado: { precio: 1200000 } },
+  UltraVIP1: {
+    viernes: { precio: 500000, consumo: 440000 },
+    sabado: { precio: 600000, consumo: 540000 },
+  },
+  UltraVIP2: {
+    viernes: { precio: 400000, consumo: 340000 },
+    sabado: { precio: 500000, consumo: 440000 },
+  },
+  Palco: {
+    viernes: { precio: 300000, consumo: 240000 },
+    sabado: { precio: 400000, consumo: 340000 },
+  },
+  Suite: {
+    viernes: { precio: 300000, consumo: 240000 },
+    sabado: { precio: 400000, consumo: 340000 },
+  },
+  Platea: {
+    viernes: { precio: 200000, consumo: 140000 },
+    sabado: { precio: 200000, consumo: 140000 },
+  },
+};
+
+const CATEGORIA_PRECIO_POR_SECTOR = {
+  "Escenario": "Escenario",
+  "VIP Burbuja": "Backstage",
+  "Balcón Tincho": "Palco",
+  "Balcón Canepa": "Palco",
+  "VIP Suite": "Suite",
+  "Platea": "Platea",
+  // "Ultra VIP" y "VIP" se resuelven por id, ver categoriaPrecioDe()
+  // "Gradas" no se vende (sin categoría de precio)
+};
+
+const CAPACIDAD_POR_SECTOR = {
+  "Escenario": 10,
+  "VIP Burbuja": 10,
+  "Gradas": 6,
+  "Ultra VIP": 8,
+  "VIP": 8,
+  "Balcón Tincho": 6,
+  "Balcón Canepa": 6,
+  "VIP Suite": 10,
+  "Platea": 4,
+};
+
+function categoriaPrecioDe(id, sector) {
+  if (sector === "Ultra VIP") {
+    // mesas 16-28: bloque más cercano al escenario. 29-42: bloque más alejado.
+    return Number(id) <= 28 ? "UltraVIP1" : "UltraVIP2";
+  }
+  if (sector === "VIP") return "UltraVIP1";
+  if (sector === "Gradas") return null;
+  return CATEGORIA_PRECIO_POR_SECTOR[sector] || null;
+}
+
+// devuelve { precio, consumo, full } para una mesa y un día ("viernes" | "sabado"), o null si no se vende
+function getPrecio(m, dia) {
+  if (!m.categoriaPrecio) return null;
+  const cat = PRECIOS[m.categoriaPrecio];
+  if (!cat || !cat[dia]) return null;
+  return {
+    precio: cat[dia].precio,
+    consumo: cat[dia].consumo ?? null,
+    full: !!cat.full,
+  };
+}
+
 // helper para crear una mesa con valores por defecto segun sector
 function mesa(id, sector, overrides = {}) {
-  const defaults = {
-    "Escenario": { capacidad: 10, consumo: 250000, precio: 300000 },
-    "VIP Burbuja": { capacidad: 10, consumo: 300000, precio: 350000 },
-    "Corralito": { capacidad: 6, consumo: 150000, precio: 180000 },
-    "Gradas": { capacidad: 6, consumo: 150000, precio: 180000 },
-    "Ultra VIP": { capacidad: 8, consumo: 220000, precio: 260000 },
-    "VIP": { capacidad: 8, consumo: 180000, precio: 210000 },
-    "Balcón Tincho": { capacidad: 6, consumo: 130000, precio: 160000 },
-    "Balcón Canepa": { capacidad: 6, consumo: 130000, precio: 160000 },
-    "VIP Suite": { capacidad: 10, consumo: 280000, precio: 320000 },
-    "Platea": { capacidad: 4, consumo: 80000, precio: 100000 },
-  };
-  const base = defaults[sector] || { capacidad: 6, consumo: 100000, precio: 120000 };
   const [x, y] = POSICIONES[id] || [50, 50];
+  const capacidad = CAPACIDAD_POR_SECTOR[sector] || 6;
+  const categoriaPrecio = categoriaPrecioDe(id, sector);
   return {
     id: String(id),
     sector,
     x,
     y,
-    capacidad: base.capacidad,
-    consumo: base.consumo,
-    precio: base.precio,
+    capacidad,
+    categoriaPrecio,
+    vendible: categoriaPrecio !== null,
     estado: "disponible", // "disponible" | "reservada"
     publica: PUBLICA_UNICA,
     ...overrides,
@@ -155,8 +215,8 @@ const MESAS = [];
 // --- Escenario (frente al escenario) ---
 MESAS.push(mesa(1, "Escenario"), mesa(2, "Escenario"), mesa(3, "Escenario"), mesa(4, "Escenario"), mesa(5, "Escenario"));
 
-// --- Corralito ---
-MESAS.push(mesa("A", "Corralito"), mesa("B", "Corralito"));
+// --- Gradas (junto a la mesa A/B, pegadas al escenario/DJ) ---
+MESAS.push(mesa("A", "Gradas"), mesa("B", "Gradas"));
 
 // --- VIP Burbuja (2 filas x 5 columnas) ---
 for (let id = 6; id <= 15; id++) MESAS.push(mesa(id, "VIP Burbuja"));

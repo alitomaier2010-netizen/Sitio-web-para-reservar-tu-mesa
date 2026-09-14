@@ -17,11 +17,34 @@
 }
 
 body {
+  position: relative;
   margin: 0;
-  background: var(--bg);
   color: var(--text);
   font-family: "Segoe UI", system-ui, sans-serif;
   min-height: 100vh;
+  background-color: var(--bg);
+}
+
+/* fondo ambiental: la misma imagen del mapa, muy difuminada, para que dé
+   color y atmósfera a todo el sitio sin repetir logos/texto legibles
+   (eso se veía "duplicado" contra la versión nítida del recuadro del mapa) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -40px;
+  background-image: url("Mapas-limpio.jpg");
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+  filter: blur(45px) brightness(0.55) saturate(1.15);
+  z-index: -1;
+}
+
+@media (max-width: 768px) {
+  body::before {
+    position: absolute;
+    filter: blur(30px) brightness(0.55) saturate(1.15);
+  }
 }
 
 .hero {
@@ -35,12 +58,14 @@ body {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.02em;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.7);
 }
 
 .hero__subtitle {
   color: var(--text-dim);
   margin-top: 0.5rem;
   font-size: 1.05rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
 }
 
 .mapa-wrap {
@@ -57,15 +82,15 @@ body {
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    #000 3%,
-    #000 97%,
+    #000 12%,
+    #000 88%,
     transparent 100%
   );
   mask-image: linear-gradient(
     to bottom,
     transparent 0,
-    #000 3%,
-    #000 97%,
+    #000 12%,
+    #000 88%,
     transparent 100%
   );
 }
@@ -318,5 +343,97 @@ body {
 
 .mesa-info__ig:hover {
   filter: brightness(1.1);
+}
+
+.mesa-info__no-vendible {
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 1rem;
+  margin: 0 0 1.5rem;
+}
+
+.dia-selector {
+  margin-bottom: 1.25rem;
+}
+
+.dia-selector__label {
+  display: block;
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+}
+
+.dia-selector__botones {
+  display: flex;
+  gap: 0.6rem;
+}
+
+.dia-btn {
+  flex: 1;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+
+.dia-btn:hover {
+  border-color: var(--accent-light);
+}
+
+.dia-btn.is-selected {
+  background: var(--accent);
+  border-color: var(--accent-light);
+  box-shadow: 0 0 12px rgba(88, 101, 255, 0.4);
+}
+
+.mesa-info__dato--placeholder {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+.btn-reservar {
+  display: block;
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.9rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--gold);
+  color: #1a1408;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.15s ease;
+}
+
+.btn-reservar:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.btn-reservar:disabled {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  cursor: not-allowed;
+}
+
+.reserva-aviso {
+  text-align: center;
+  color: #5ee69a;
+  font-size: 0.9rem;
+  margin: 0.75rem 0 0;
 }
 

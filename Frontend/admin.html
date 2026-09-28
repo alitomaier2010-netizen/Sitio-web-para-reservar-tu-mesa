@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Non Stop · Admin reservas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <h1 class="hero__title">Admin · Reservas</h1>
+    <p class="hero__subtitle">Confirmá o cancelá reservas por fecha</p>
+    <div class="hero__tools">
+      <a class="tool-btn tool-btn--link" href="index.html">← Volver al mapa</a>
+    </div>
+  </header>
+
+  <main class="admin-wrap">
+    <div class="admin-card">
+      <div class="admin-row">
+        <div class="admin-field">
+          <label class="res-form__label" for="adminKey">Clave admin</label>
+          <input class="res-form__input" id="adminKey" type="password" placeholder="ADMIN_KEY de api/config.php" />
+        </div>
+        <div class="admin-field">
+          <label class="res-form__label" for="adminEstado">Estado</label>
+          <select class="res-form__input" id="adminEstado">
+            <option value="todas">Todas</option>
+            <option value="pendiente" selected>Pendientes</option>
+            <option value="confirmada">Confirmadas</option>
+            <option value="cancelada">Canceladas</option>
+          </select>
+        </div>
+        <button type="button" class="tool-btn" id="btnCargar">Cargar</button>
+      </div>
+      <p class="api-status" id="adminStatus"></p>
+    </div>
+
+    <div class="admin-card">
+      <div style="overflow-x:auto">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mesa</th>
+              <th>Fecha</th>
+              <th>Cliente</th>
+              <th>Precio</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="adminRows">
+            <tr><td colspan="7">Ingresá la clave y apretá Cargar.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const fmt = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
+
+    async function cargar() {
+      const key = $("adminKey").value.trim();
+      const estado = $("adminEstado").value;
+      if (!key) { $("adminStatus").textContent = "Escribí la clave admin."; return; }
+      $("adminStatus").textContent = "Cargando...";
+      try {
+        const r = await fetch(`api/admin.php?key=${encodeURIComponent(key)}&estado=${encodeURIComponent(estado)}`);
+        const d = await r.json();
+        if (!r.ok || !d.ok) throw new Error(d.error || "Error");
+        $("adminStatus").textContent = `${d.reservas.length} reservas · Vie ${d.fechas.viernes} / Sáb ${d.fechas.sabado}`;
+        const tb = $("adminRows");
+        tb.innerHTML = "";
+        if (d.reservas.length === 0) {
+          tb.innerHTML = `<tr><td colspan="7">Sin reservas en ese estado.</td></tr>`;
+          return;
+        }
+        for (const res of d.reservas) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${res.id}</td>
+            <td><b>${res.mesa_id}</b><br><small>${res.sector} · ${res.dia}</small></td>
+            <td>${res.fecha_evento}</td>
+            <td><b>${res.cliente_nombre}</b><br><small>${res.cliente_contacto}</small></td>
+            <td>${fmt.format(res.precio_acordado)}${res.consumo_acordado != null ? `<br><small>cons ${fmt.format(res.consumo_acordado)}</small>` : ""}</td>
+            <td><span class="admin-badge admin-badge--${res.estado}">${res.estado}</span></td>
+            <td><div class="admin-actions"></div></td>
+          `;
+          const box = tr.querySelector(".admin-actions");
+          for (const est of ["confirmada", "pendiente", "cancelada"]) {
+            if (est === res.estado) continue;
+            const b = document.createElement("button");
+            b.className = "admin-btn";
+            b.textContent = est;
+            b.addEventListener("click", () => cambiar(key, res.id, est));
+            box.appendChild(b);
+          }
+          tb.appendChild(tr);
+        }
+      } catch (e) {
+        $("adminStatus").textContent = `Error: ${e.message}`;
+      }
+    }
+
+    async function cambiar(key, id, estado) {
+      try {
+        const r = await fetch("api/admin.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ key, id, estado }),
+        });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error || "Error");
+        cargar();
+      } catch (e) {
+        alert(`No se pudo actualizar: ${e.message}`);
+      }
+    }
+
+    $("btnCargar").addEventListener("click", cargar);
+  </script>
+</body>
+</html>

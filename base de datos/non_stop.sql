@@ -1,6 +1,6 @@
--- Base de datos del sitio Non Stop (mapa de mesas y reservas)
--- Dialecto: MySQL / MariaDB (usa ENGINE=InnoDB por las FOREIGN KEY)
--- Generado a partir de Frontend/data.js
+CREATE DATABASE IF NOT EXISTS non_stop
+  CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE non_stop;
 
 CREATE TABLE sectores (
   id INT AUTO_INCREMENT PRIMARY KEY,
@@ -11,8 +11,8 @@ CREATE TABLE sectores (
 
 CREATE TABLE categorias_precio (
   id INT AUTO_INCREMENT PRIMARY KEY,
-  nombre VARCHAR(50) NOT NULL UNIQUE, -- Escenario, Backstage, UltraVIP1 (mesas 16-28 y bloque VIP central), UltraVIP2, Palco, Suite, Platea
-  es_full BOOLEAN NOT NULL DEFAULT FALSE -- TRUE = precio unico sin consumo minimo aparte
+  nombre VARCHAR(50) NOT NULL UNIQUE,
+  es_full BOOLEAN NOT NULL DEFAULT FALSE
 ) ENGINE=InnoDB;
 
 CREATE TABLE precios (
@@ -20,7 +20,7 @@ CREATE TABLE precios (
   categoria_precio_id INT NOT NULL,
   dia ENUM('viernes','sabado') NOT NULL,
   precio DECIMAL(10,2) NOT NULL,
-  consumo DECIMAL(10,2) NULL, -- NULL cuando la categoria es full
+  consumo DECIMAL(10,2) NULL,
   UNIQUE KEY uq_categoria_dia (categoria_precio_id, dia),
   FOREIGN KEY (categoria_precio_id) REFERENCES categorias_precio(id)
 ) ENGINE=InnoDB;
@@ -32,10 +32,10 @@ CREATE TABLE publicos (
 ) ENGINE=InnoDB;
 
 CREATE TABLE mesas (
-  id VARCHAR(10) PRIMARY KEY, -- coincide con el id del mapa (ej. '1', 'A', 'C1')
+  id VARCHAR(10) PRIMARY KEY,
   sector_id INT NOT NULL,
-  categoria_precio_id INT NULL, -- NULL = sector no vendible (ej. Gradas)
-  pos_x DECIMAL(5,2) NOT NULL, -- posicion % sobre la imagen del mapa
+  categoria_precio_id INT NULL,
+  pos_x DECIMAL(5,2) NOT NULL,
   pos_y DECIMAL(5,2) NOT NULL,
   capacidad INT NOT NULL,
   estado ENUM('disponible','reservada') NOT NULL DEFAULT 'disponible',
@@ -56,10 +56,11 @@ CREATE TABLE reservas (
   consumo_acordado DECIMAL(10,2) NULL,
   estado ENUM('pendiente','confirmada','cancelada') NOT NULL DEFAULT 'pendiente',
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (mesa_id) REFERENCES mesas(id)
+  FOREIGN KEY (mesa_id) REFERENCES mesas(id),
+  UNIQUE KEY uq_mesa_fecha (mesa_id, fecha_evento),
+  KEY idx_fecha_estado (fecha_evento, estado)
 ) ENGINE=InnoDB;
 
--- Sectores
 INSERT INTO sectores (id, nombre, capacidad, vendible) VALUES
   (1, 'Escenario', 10, TRUE),
   (2, 'VIP Burbuja', 10, TRUE),
@@ -71,7 +72,6 @@ INSERT INTO sectores (id, nombre, capacidad, vendible) VALUES
   (8, 'VIP Suite', 10, TRUE),
   (9, 'Platea', 4, TRUE);
 
--- Categorias de precio
 INSERT INTO categorias_precio (id, nombre, es_full) VALUES
   (1, 'Escenario', TRUE),
   (2, 'Backstage', TRUE),
@@ -81,7 +81,6 @@ INSERT INTO categorias_precio (id, nombre, es_full) VALUES
   (6, 'Suite', FALSE),
   (7, 'Platea', FALSE);
 
--- Precios por dia
 INSERT INTO precios (categoria_precio_id, dia, precio, consumo) VALUES
   (1, 'viernes', 1300000.00, NULL),
   (1, 'sabado', 1500000.00, NULL),
@@ -98,11 +97,9 @@ INSERT INTO precios (categoria_precio_id, dia, precio, consumo) VALUES
   (7, 'viernes', 200000.00, 140000.00),
   (7, 'sabado', 200000.00, 140000.00);
 
--- Publico (promotor/a a cargo)
 INSERT INTO publicos (id, nombre, instagram) VALUES
   (1, 'Aramis', 'ara.nonstop');
 
--- Mesas
 INSERT INTO mesas (id, sector_id, categoria_precio_id, pos_x, pos_y, capacidad, estado, publica_id) VALUES
   ('1', 1, 1, 33.71, 19.96, 10, 'disponible', 1),
   ('2', 1, 1, 39.21, 17.54, 10, 'disponible', 1),

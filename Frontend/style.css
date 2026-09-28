@@ -437,3 +437,162 @@ body::before {
   margin: 0.75rem 0 0;
 }
 
+.api-status {
+  margin: 0.6rem 0 0;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.api-status--ok {
+  color: #5ee69a;
+}
+
+.api-status--off {
+  color: #ffb86b;
+}
+
+.hero__tools {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.tool-btn {
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.tool-btn:hover {
+  border-color: var(--accent-light);
+}
+
+.res-form {
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 1.25rem;
+}
+
+.res-form__label {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.res-form__input {
+  padding: 0.65rem 0.8rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  font-size: 1rem;
+  width: 100%;
+}
+
+.res-form__input:focus {
+  outline: none;
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px rgba(88, 101, 255, 0.25);
+}
+
+.reserva-aviso--off {
+  color: #ffb86b;
+}
+
+.edit-bar {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin: 0 auto 1rem;
+  padding: 0.6rem 1rem;
+  max-width: 680px;
+  background: rgba(43, 59, 255, 0.12);
+  border: 1px dashed var(--accent-light);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+body.edit-mode .hotspot {
+  outline: 2px dashed var(--gold);
+  outline-offset: 2px;
+}
+
+/* Admin */
+.admin-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 4rem;
+}
+
+.admin-card {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.admin-row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  align-items: end;
+}
+
+.admin-field {
+  display: grid;
+  gap: 0.3rem;
+  flex: 1;
+  min-width: 160px;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-table th,
+.admin-table td {
+  text-align: left;
+  padding: 0.55rem 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  vertical-align: top;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-badge--pendiente { background: rgba(255, 184, 107, 0.15); color: #ffb86b; }
+.admin-badge--confirmada { background: rgba(94, 230, 154, 0.15); color: #5ee69a; }
+.admin-badge--cancelada { background: rgba(255, 139, 152, 0.15); color: #ff8b98; }
+
+.admin-actions { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.admin-btn {
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+.admin-btn:hover { border-color: var(--accent-light); }
+

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Non Stop · Precios barra</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="pagina-carta">
+  <header class="subpagina__head">
+    <a class="volver" href="portada.html">&larr; Volver</a>
+    <h1 class="subpagina__titulo">Non Stop</h1>
+    <p class="subpagina__subtitulo">Por favor, Full Cachengue</p>
+    <p class="api-status" id="apiStatus">Cargando carta...</p>
+  </header>
+
+  <main class="carta">
+    <section id="promos" class="carta__promos" hidden></section>
+
+    <div class="carta__columnas">
+      <div class="carta__col" id="colIzq"></div>
+      <div class="carta__col" id="colDer"></div>
+    </div>
+
+    <section class="pagos">
+      <h2 class="pagos__titulo">Formas de pago</h2>
+      <ul class="pagos__lista" id="formasPago"></ul>
+    </section>
+  </main>
+
+  <script src="carta.js"></script>
+</body>
+</html>

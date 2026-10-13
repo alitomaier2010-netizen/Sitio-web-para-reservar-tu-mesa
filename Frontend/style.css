@@ -596,3 +596,480 @@ body.edit-mode .hotspot {
 }
 .admin-btn:hover { border-color: var(--accent-light); }
 
+
+/* ===========================================================================
+   PORTADA / SUBPAGINAS / CARTA / CONSUMO
+   =========================================================================== */
+
+.pagina-portada,
+.pagina-carta,
+.pagina-consumo {
+  background-color: var(--bg);
+}
+
+/* Necesario porque varios bloques de abajo usan display:flex/grid, y eso
+   pisa el `display:none` que el navegador aplica al atributo [hidden]. */
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Portada ---------- */
+
+.portada {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  padding: 3rem 1.25rem;
+  text-align: center;
+}
+
+.portada__head {
+  max-width: 720px;
+}
+
+.portada__titulo {
+  margin: 0;
+  font-size: clamp(2.6rem, 11vw, 6rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  background: linear-gradient(180deg, #ffffff 0%, #b9c0ff 55%, var(--accent-light) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: 0 0 60px rgba(88, 101, 255, 0.45);
+}
+
+.portada__subtitulo {
+  margin: 0.85rem 0 0;
+  font-size: clamp(0.72rem, 2.4vw, 0.95rem);
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  color: var(--gold);
+}
+
+.portada__menu {
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+  width: 100%;
+  max-width: 480px;
+}
+
+.portada-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 1.35rem 1.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: var(--panel-bg);
+  color: var(--text);
+  text-decoration: none;
+  text-align: center;
+  transition: transform 0.16s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.portada-btn__titulo {
+  font-size: clamp(1.3rem, 4.6vw, 1.85rem);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.portada-btn__detalle {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+}
+
+.portada-btn:hover,
+.portada-btn:focus-visible {
+  transform: translateY(-2px);
+  border-color: #fff;
+}
+
+.portada-btn--reserva:hover,
+.portada-btn--reserva:focus-visible { box-shadow: 0 0 0 1px var(--accent-light), 0 10px 34px rgba(43, 59, 255, 0.4); }
+.portada-btn--barra:hover,
+.portada-btn--barra:focus-visible { box-shadow: 0 0 0 1px var(--gold), 0 10px 34px rgba(212, 175, 106, 0.32); }
+.portada-btn--consumo:hover,
+.portada-btn--consumo:focus-visible { box-shadow: 0 0 0 1px #ff3d8b, 0 10px 34px rgba(255, 61, 139, 0.3); }
+
+.portada__status {
+  margin: 0;
+}
+
+/* ---------- Cabecera de subpaginas (carta / consumo) ---------- */
+
+.subpagina__head {
+  text-align: center;
+  padding: 2.25rem 1.25rem 1.25rem;
+  position: relative;
+}
+
+.subpagina__titulo {
+  margin: 0;
+  font-size: clamp(2.2rem, 9vw, 4rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.subpagina__subtitulo {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.28em;
+  color: var(--gold);
+}
+
+.volver {
+  position: absolute;
+  top: 1.1rem;
+  left: 1.1rem;
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.volver:hover { color: var(--text); }
+
+/* ---------- Carta ---------- */
+
+.carta {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 4rem;
+}
+
+.carta__promos {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.75rem;
+}
+
+.promo {
+  border: 2px solid #ff3d8b;
+  border-radius: 12px;
+  background: rgba(255, 61, 139, 0.08);
+  padding: 1rem 1.15rem;
+}
+
+.promo__titulo {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #ff85b8;
+}
+
+.promo__precios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1.25rem;
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.promo__desc { color: var(--accent-light); }
+.promo__detalle { margin: 0.45rem 0 0; font-size: 0.82rem; color: var(--text-dim); }
+
+.carta__columnas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+}
+
+@media (min-width: 760px) {
+  .carta__columnas { grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+}
+
+.carta__col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.carta__cat {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 0.9rem 1rem 1rem;
+}
+
+.carta__cat-titulo {
+  margin: 0 0 0.55rem;
+  font-size: 0.95rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 2px solid rgba(255, 61, 139, 0.55);
+}
+
+.carta__nota {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: #ff85b8;
+  text-transform: none;
+}
+
+.carta__cols-head,
+.carta__item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.carta__cols-head {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  padding-bottom: 0.3rem;
+}
+
+.carta__items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.carta__item {
+  padding: 0.22rem 0;
+  font-size: 0.86rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.carta__item:last-child { border-bottom: 0; }
+.carta__nombre { color: var(--text); }
+
+.carta__pl,
+.carta__desc {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  min-width: 5.4rem;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.carta__pl { color: var(--text-dim); text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.25); }
+.carta__desc { color: var(--accent-light); }
+
+/* La caja de vasos del boceto va recuadrada aparte */
+.carta__caja { border: 2px solid rgba(255, 61, 139, 0.5); }
+
+/* ---------- Formas de pago ---------- */
+
+.pagos {
+  margin-top: 1.75rem;
+  padding: 1rem 1.15rem 1.15rem;
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+}
+
+.pagos__titulo {
+  margin: 0 0 0.65rem;
+  font-size: 0.85rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+.pagos__lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.pagos__item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.6rem;
+  align-items: baseline;
+  font-size: 0.88rem;
+}
+
+.pagos__nombre { font-weight: 700; }
+.pagos__detalle { font-size: 0.8rem; color: var(--text-dim); }
+
+/* ---------- Consumo ---------- */
+
+.consumo {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem 1.25rem 4rem;
+}
+
+.consumo__intro {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #ff3d8b;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.5rem;
+}
+
+.consumo__intro p { margin: 0 0 0.5rem; font-size: 0.9rem; line-height: 1.55; color: var(--text-dim); }
+.consumo__intro p:last-child { margin-bottom: 0; }
+.consumo__intro strong { color: var(--text); }
+.consumo__regla { font-size: 0.82rem !important; color: var(--gold) !important; }
+
+.consumo__form {
+  background: var(--panel-bg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.35rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.campo { border: 0; margin: 0; padding: 0; }
+
+.campo__label {
+  display: block;
+  padding: 0;
+  margin-bottom: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+}
+
+.campo__ayuda { margin: 0.4rem 0 0; font-size: 0.76rem; color: var(--text-dim); }
+
+.input {
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: #07070c;
+  color: var(--text);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px rgba(88, 101, 255, 0.22);
+}
+
+.zonas {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 560px) {
+  .zonas { grid-template-columns: 1fr 1fr; }
+}
+
+.zona {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #07070c;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.zona:hover { border-color: rgba(255, 255, 255, 0.3); }
+
+.zona:has(input:checked) {
+  border-color: #ff3d8b;
+  background: rgba(255, 61, 139, 0.1);
+  box-shadow: 0 0 0 1px rgba(255, 61, 139, 0.35);
+}
+
+.zona input { margin-top: 0.2rem; accent-color: #ff3d8b; flex-shrink: 0; }
+
+.zona__body { display: flex; flex-direction: column; gap: 0.15rem; }
+.zona__nombre { font-weight: 700; font-size: 0.95rem; }
+
+.zona__extra {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #ff85b8;
+}
+
+.zona__desc { font-size: 0.73rem; color: var(--text-dim); }
+
+.resumen {
+  border: 1px dashed rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.resumen__linea {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.resumen__linea--total {
+  padding-top: 0.4rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.aviso {
+  margin: 0;
+  padding: 0.75rem 0.9rem;
+  border-radius: 9px;
+  font-size: 0.88rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.aviso--error { background: rgba(200, 60, 60, 0.16); border-color: rgba(255, 120, 120, 0.45); }
+.aviso--ok { background: rgba(60, 180, 120, 0.15); border-color: rgba(120, 230, 180, 0.45); }
+
+.btn {
+  padding: 0.7rem 1.1rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn--primary { background: var(--accent); color: #fff; }
+.btn--primary:hover:not(:disabled) { box-shadow: 0 8px 26px rgba(43, 59, 255, 0.45); }
+.btn--grande { padding: 0.95rem 1.25rem; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Non Stop · Salir - Consumo</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="pagina-consumo">
+  <header class="subpagina__head">
+    <a class="volver" href="portada.html">&larr; Volver</a>
+    <h1 class="subpagina__titulo">Salir - Consumo</h1>
+    <p class="subpagina__subtitulo">Elegí una zona, decidí cuánta gente va y sacá tu consumo</p>
+    <p class="api-status" id="apiStatus">Cargando zonas...</p>
+  </header>
+
+  <main class="consumo">
+    <section class="consumo__intro">
+      <p>
+        Acá no reservás una mesa: elegís la <strong>zona</strong> donde querés pasar la noche
+        y sacás un consumo. Con ese consumo pagado podés acceder a esa zona.
+        El adicional de la zona se suma una sola vez, sin importar quantas personas van.
+      </p>
+      <p class="consumo__regla" id="reglaMax"></p>
+    </section>
+
+    <form id="formConsumo" class="consumo__form" novalidate>
+      <fieldset class="campo campo--zonas">
+        <legend class="campo__label">1. Elegí la zona</legend>
+        <div class="zonas" id="listaZonas"></div>
+      </fieldset>
+
+      <div class="campo">
+        <label class="campo__label" for="personas">2. Cuántas personas van</label>
+        <select class="input" id="personas" name="personas"></select>
+      </div>
+
+      <div class="campo">
+        <label class="campo__label" for="consumo">3. Consumo que querés sacar</label>
+        <input class="input" id="consumo" name="consumo" type="text" inputmode="numeric"
+               placeholder="Ej: 80000" autocomplete="off" />
+        <p class="campo__ayuda">Sin mínimo. Escribí el monto y le sumamos el adicional de la zona.</p>
+      </div>
+
+      <div class="campo">
+        <label class="campo__label" for="nombre">4. Tu nombre</label>
+        <input class="input" id="nombre" name="nombre" type="text" maxlength="100" autocomplete="name" />
+      </div>
+
+      <div class="campo">
+        <label class="campo__label" for="contacto">5. Tu contacto</label>
+        <input class="input" id="contacto" name="contacto" type="text" maxlength="100"
+               placeholder="Celular o Instagram" autocomplete="tel" />
+      </div>
+
+      <div class="resumen" id="resumen" hidden>
+        <div class="resumen__linea">
+          <span>Consumo</span><span id="rBase">—</span>
+        </div>
+        <div class="resumen__linea">
+          <span>Adicional de la zona</span><span id="rAdicional">—</span>
+        </div>
+        <div class="resumen__linea resumen__linea--total">
+          <span>Total</span><span id="rTotal">—</span>
+        </div>
+      </div>
+
+      <p class="aviso" id="aviso" hidden></p>
+
+      <button class="btn btn--primary btn--grande" type="submit" id="btnEnviar">
+        Sacar consumo
+      </button>
+
+      <section class="pagos">
+        <h2 class="pagos__titulo">Formas de pago</h2>
+        <ul class="pagos__lista" id="formasPago"></ul>
+      </section>
+    </form>
+  </main>
+
+  <script src="consumo.js"></script>
+</body>
+</html>

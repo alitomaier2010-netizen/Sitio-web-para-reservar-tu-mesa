@@ -17,8 +17,25 @@ $fecha_in = trim((string)($b['fecha_evento'] ?? ''));
 $nombre = trim((string)($b['cliente_nombre'] ?? ''));
 $contacto = trim((string)($b['cliente_contacto'] ?? ''));
 
-if ($mesa_id === '' || !dia_valido($dia)) {
-  json_error('Faltan mesa_id y dia (viernes/sabado)');
+if ($mesa_id === '') {
+  json_error('Falta mesa_id');
+}
+
+// "dia" es opcional si viene fecha_evento: en ese caso lo derivamos del
+// dia de la semana, para que el cliente pueda mandar solo la fecha.
+if (!dia_valido($dia)) {
+  if ($fecha_in === '') {
+    json_error('Falta dia (viernes/sabado) o fecha_evento');
+  }
+  $tmp = DateTime::createFromFormat('Y-m-d', $fecha_in);
+  if (!$tmp || $tmp->format('Y-m-d') !== $fecha_in) {
+    json_error('fecha_evento inválida, usá formato YYYY-MM-DD');
+  }
+  $n = (int)$tmp->format('N');
+  if ($n !== 5 && $n !== 6) {
+    json_error('Solo se reservan mesas para viernes o sábado');
+  }
+  $dia = $n === 5 ? 'viernes' : 'sabado';
 }
 if (mb_strlen($nombre) < 2 || mb_strlen($nombre) > 100) {
   json_error('Decinos tu nombre (2 a 100 caracteres)');

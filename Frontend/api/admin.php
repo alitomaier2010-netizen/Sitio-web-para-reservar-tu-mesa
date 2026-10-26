@@ -1,14 +1,19 @@
 <?php
-// Panel admin simple con clave.
-// GET  api/admin.php?key=XXX[&estado=pendiente|confirmada|cancelada|todas]
-// POST api/admin.php  { key, id, estado } -> cambia pendiente/confirmada/cancelada
-// POST api/admin.php  { key, action:"posiciones", posiciones:{id:[x,y]} } -> guarda mapa
-require_once __DIR__ . '/db.php';
+// Panel admin. La clave va en el header X-Admin-Key (o en el body JSON),
+// NUNCA en la URL: así no queda registrada en los logs de Apache.
+//
+// GET  api/admin.php?estado=pendiente|confirmada|cancelada|todas
+// POST api/admin.php  { id, estado } -> cambia pendiente/confirmada/cancelada
+// POST api/admin.php  { action:"posiciones", posiciones:{id:[x,y]} } -> guarda mapa
+require_once __DIR__ . '/session.php';
+
+header('X-Robots-Tag: noindex, nofollow');
 
 $pdo = db();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-  check_admin($_GET['key'] ?? null);
+  check_admin(admin_key());
+
   $estado = $_GET['estado'] ?? 'todas';
   $where = '';
   $params = [];
@@ -16,13 +21,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $where = 'WHERE r.estado = ?';
     $params[] = $estado;
   }
+
   $st = $pdo->prepare("
     SELECT r.id, r.mesa_id, s.nombre AS sector, r.dia, r.fecha_evento,
            r.cliente_nombre, r.cliente_contacto,
-           r.precio_acordado, r.consumo_acordado, r.estado, r.creado_en
+           r.precio_acordado, r.consumo_acordado, r.estado, r.creado_en,
+           u.id AS usuario_id, u.email AS usuario_email,
+           u.nombre_completo AS usuario_nombre
     FROM reservas r
     JOIN mesas m ON m.id = r.mesa_id
     JOIN sectores s ON s.id = m.sector_id
+    LEFT JOIN usuarios u ON u.id = r.usuario_id
     $where
     ORDER BY r.fecha_evento ASC, r.creado_en DESC
     LIMIT 500
@@ -32,13 +41,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
   foreach ($rows as &$r) {
     $r['precio_acordado'] = (float)$r['precio_acordado'];
     $r['consumo_acordado'] = $r['consumo_acordado'] === null ? null : (float)$r['consumo_acordado'];
+    $r['usuario_id'] = $r['usuario_id'] === null ? null : (int)$r['usuario_id'];
   }
+  unset($r);
+
   json_out(['ok' => true, 'reservas' => $rows, 'fechas' => fechas_semana()]);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+  check_mismo_origen();
+
   $b = body_json();
-  check_admin($b['key'] ?? null);
+  check_admin(admin_key($b));
 
   // Guardar posiciones del mapa (modo edición ⚙)
   if (($b['action'] ?? '') === 'posiciones') {

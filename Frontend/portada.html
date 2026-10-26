@@ -13,10 +13,69 @@
       <p class="portada__subtitulo">Por favor, Full Cachengue</p>
     </header>
 
-    <nav class="portada__menu">
-      <a class="portada-btn portada-btn--reserva" href="index.html">
+    <p class="portada__cargando" id="portadaCargando">Un segundo...</p>
+
+    <!-- Acceso: cuenta opcional -->
+    <section class="acceso" id="acceso" hidden aria-label="Acceso">
+      <div class="acceso__card">
+        <p class="acceso__lead">Entrá a tu cuenta para que tus reservas queden guardadas, o seguí sin registrarte.</p>
+
+        <div class="acceso__tabs" role="tablist" aria-label="Iniciar sesión o crear cuenta">
+          <button type="button" class="acceso__tab is-active" id="tabLogin" data-vista="login"
+                  role="tab" aria-selected="true" aria-controls="formLogin">Iniciar sesión</button>
+          <button type="button" class="acceso__tab" id="tabRegistro" data-vista="registro"
+                  role="tab" aria-selected="false" aria-controls="formRegistro">Crear cuenta</button>
+        </div>
+
+        <form class="acceso__form" id="formLogin" novalidate>
+          <label class="acceso__label" for="loginEmail">Correo electrónico</label>
+          <input class="acceso__input" id="loginEmail" type="email" maxlength="190"
+                 autocomplete="email" placeholder="tucorreo@ejemplo.com" />
+
+          <label class="acceso__label" for="loginPass">Contraseña</label>
+          <input class="acceso__input" id="loginPass" type="password" maxlength="72"
+                 autocomplete="current-password" placeholder="Tu contraseña" />
+
+          <button class="btn btn--primary btn--grande" type="submit" id="btnLogin">Entrar</button>
+        </form>
+
+        <form class="acceso__form" id="formRegistro" novalidate hidden>
+          <label class="acceso__label" for="regNombre">Nombre y apellido</label>
+          <input class="acceso__input" id="regNombre" type="text" maxlength="100"
+                 autocomplete="name" placeholder="Ej: Alexis Maier" />
+
+          <label class="acceso__label" for="regEmail">Correo electrónico</label>
+          <input class="acceso__input" id="regEmail" type="email" maxlength="190"
+                 autocomplete="email" placeholder="tucorreo@ejemplo.com" />
+
+          <label class="acceso__label" for="regPass">Contraseña</label>
+          <input class="acceso__input" id="regPass" type="password" maxlength="72"
+                 autocomplete="new-password" placeholder="Mínimo 8 caracteres" />
+
+          <button class="btn btn--primary btn--grande" type="submit" id="btnRegistro">Crear mi cuenta</button>
+        </form>
+
+        <p class="acceso__aviso" id="accesoAviso" hidden></p>
+
+        <div class="acceso__sin">
+          <span class="acceso__sin-texto">o</span>
+          <button type="button" class="acceso__sin-btn" id="btnSinCuenta">Continuar sin cuenta</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Saludo / sesión -->
+    <div class="portada__sesion" id="sesionInfo" hidden>
+      <p class="portada__saludo" id="saludo"></p>
+      <button type="button" class="portada__link" id="btnSesion"></button>
+    </div>
+
+    <!-- Menú principal -->
+    <nav class="portada__menu" id="menuPrincipal" hidden aria-label="Opciones principales">
+      <a class="portada-btn portada-btn--reserva portada-btn--destacado" href="index.html">
+        <span class="portada-btn__badge">El más pedido</span>
         <span class="portada-btn__titulo">Reservar mesa!!!</span>
-        <span class="portada-btn__detalle">Elegí tu mesa en el mapa</span>
+        <span class="portada-btn__detalle">Elegí tu mesa en el mapa y asegurá la noche</span>
       </a>
 
       <a class="portada-btn portada-btn--barra" href="carta.html">
@@ -29,10 +88,32 @@
         <span class="portada-btn__detalle">Elegí tu zona y sacá tu consumo</span>
       </a>
     </nav>
-
-    <p class="api-status portada__status" id="apiStatus">Conectando...</p>
   </main>
 
+  <!-- Mensaje patrocinador: aparece al elegir "Continuar sin cuenta" -->
+  <div class="sponsor" id="sponsor" hidden>
+    <div class="sponsor__caja" role="dialog" aria-modal="true" aria-labelledby="sponsorTitulo">
+      <p class="sponsor__marca">Non Stop</p>
+      <h2 class="sponsor__titulo" id="sponsorTitulo">Por favor, Full Cachengue</h2>
+      <p class="sponsor__texto">
+        Esta noche la hacés completa: reservá tu mesa o sacá tu consumo y quedate hasta que
+        no den más las piernas. La previa, la barra y el after tienen un solo dueño.
+      </p>
+      <p class="sponsor__texto sponsor__texto--destacado">
+        Seguinos en <a href="https://instagram.com/ara.nonstop" target="_blank" rel="noopener">@ara.nonstop</a>
+        para ver fechas, fotos y promos de la semana.
+      </p>
+      <div class="sponsor__acciones">
+        <a class="btn btn--primary" href="https://instagram.com/ara.nonstop" target="_blank" rel="noopener">
+          Ver Instagram
+        </a>
+        <button type="button" class="btn btn--ghost" id="sponsorCerrar">Seguir a la página</button>
+      </div>
+      <p class="sponsor__pie">Non Stop · Por favor, Full Cachengue</p>
+    </div>
+  </div>
+
+  <script src="estado.js" defer></script>
   <script src="portada.js"></script>
 </body>
 </html>

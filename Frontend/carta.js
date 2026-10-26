@@ -8,7 +8,6 @@ const formatoARS = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0,
 });
 
-const statusEl = document.getElementById("apiStatus");
 const colIzqEl = document.getElementById("colIzq");
 const colDerEl = document.getElementById("colDer");
 const promosEl = document.getElementById("promos");
@@ -91,14 +90,10 @@ async function cargar() {
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || "respuesta invalida");
     render(d);
-    statusEl.textContent = "Carta actualizada";
-    statusEl.className = "api-status api-status--ok";
   } catch (e) {
-    colIzqEl.innerHTML = "";
+    colIzqEl.innerHTML = `<p class="carta__vacio">No se pudo cargar la carta. Recargá la página para volver a intentar.</p>`;
     colDerEl.innerHTML = "";
     pagosEl.innerHTML = "";
-    statusEl.textContent = `No se pudo cargar la carta: ${e.message}`;
-    statusEl.className = "api-status api-status--off";
   }
 }
 

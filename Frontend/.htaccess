@@ -1,0 +1,31 @@
+# Non Stop - configuración de Apache para el sitio publicado.
+# Este archivo se copia junto con el resto del Frontend a htdocs/non_stop.
+
+# Entrada del sitio: la portada.
+DirectoryIndex portada.html index.html
+
+# Sin listado de carpetas (antes se podía navegar /api/ y ver todos los archivos).
+Options -Indexes
+
+# Firma del servidor apagada.
+ServerSignature Off
+
+<IfModule mod_headers.c>
+  Header unset X-Powered-By
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  Header always set Content-Security-Policy "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'self'; form-action 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; connect-src 'self'"
+</IfModule>
+
+# Archivos que nunca se sirven al navegador: configuración, claves, backups.
+<FilesMatch "(?i)^(config\.local\.php|config\.example\.php|\.git.*|.*\.sql|.*\.log|.*\.ini|.*\.bak|.*\.old|.*\.zip|.*\.psd|.*\.env.*)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>

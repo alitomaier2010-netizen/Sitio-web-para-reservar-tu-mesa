@@ -1,7 +1,6 @@
 const hotspotsEl = document.getElementById("hotspots");
 const infoMesaEl = document.getElementById("info-mesa");
 const infoMesaContentEl = document.getElementById("infoMesaContent");
-const apiStatusEl = document.getElementById("apiStatus");
 const btnEdit = document.getElementById("btnEdit");
 const mapaEl = document.getElementById("mapa");
 
@@ -28,18 +27,13 @@ let mesaActual = null;
 let FECHAS = { hoy: null, viernes: null, sabado: null };
 let API_OK = false;
 let editMode = false;
+let USUARIO = null;
 
 function fechaLinda(iso) {
   if (!iso) return "";
   const [y, m, d] = iso.split("-").map(Number);
   const meses = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
   return `${d} ${meses[m - 1]}`;
-}
-
-function setStatus(msg, mode) {
-  if (!apiStatusEl) return;
-  apiStatusEl.textContent = msg;
-  apiStatusEl.className = "api-status" + (mode ? ` api-status--${mode}` : "");
 }
 
 async function apiGet(url) {
@@ -75,15 +69,23 @@ async function cargarMesas(dia) {
     try {
       await apiGet("api/fechas.php");
       API_OK = true;
-      setStatus("Disponibilidad en vivo ●", "ok");
     } catch (e) {
       API_OK = false;
-      setStatus("Modo offline: sin conexión a la base (mostrando precios base)", "off");
     }
     renderHotspots();
     return;
   }
-  const fecha = FECHAS[dia];
+  let fecha = FECHAS[dia];
+  // Si las fechas todavía no llegaron (click muy rápido al entrar), las pedimos
+  // antes de consultar disponibilidad: nunca mandamos fecha nula.
+  if (!fecha) {
+    await cargarFechas();
+    fecha = FECHAS[dia];
+  }
+  if (!fecha) {
+    renderHotspots();
+    return;
+  }
   try {
     const d = await apiGet(`api/mesas.php?dia=${dia}&fecha=${fecha}`);
     if (d.ok) {
@@ -97,11 +99,9 @@ async function cargarMesas(dia) {
           local.precioApi = m.precioInfo;
         }
       }
-      setStatus(`Disponibilidad en vivo ● ${dia === "viernes" ? "Viernes" : "Sábado"} ${fechaLinda(fecha)}`, "ok");
     }
   } catch (e) {
     API_OK = false;
-    setStatus("Modo offline: no se pudo leer disponibilidad, precios base", "off");
   }
   renderHotspots();
   if (mesaActual) {
@@ -172,6 +172,15 @@ function mensajeReservaLocal(m, precioInfo) {
   return `Hola! Quiero reservar la mesa ${m.id} (${m.sector}) para el ${diaLabel}${fecha}. Vi que sale ${detalle}.`;
 }
 
+// El panel se vuelve a dibujar después de reservar, así que el aviso hay que
+// buscarlo de nuevo: si no, el mensaje de "reserva guardada" desaparece.
+function avisoReserva(texto) {
+  const aviso = document.getElementById("reservaAviso");
+  if (!aviso) return;
+  aviso.hidden = false;
+  aviso.textContent = texto;
+}
+
 async function reservarMesa() {
   if (!mesaActual || !diaSeleccionado) return;
   const nombreEl = document.getElementById("resNombre");
@@ -215,14 +224,11 @@ async function reservarMesa() {
     try {
       await navigator.clipboard.writeText(d.mensaje);
     } catch (e) {}
-    if (aviso) {
-      aviso.hidden = false;
-      aviso.textContent = `¡Reserva #${d.reserva_id} guardada! Se copió el mensaje, pegalo en Instagram.`;
-    }
     mesaActual.estado = "reservada";
     mesaActual.disponibleFecha = false;
     renderHotspots();
     mostrarInfo(mesaActual);
+    avisoReserva(`¡Reserva #${d.reserva_id} guardada! Se copió el mensaje, pegalo en Instagram.`);
     window.open(d.instagram_url, "_blank", "noopener");
     return;
   } catch (e) {
@@ -232,16 +238,16 @@ async function reservarMesa() {
       try { await navigator.clipboard.writeText(mensaje); } catch (err) {}
       if (aviso) {
         aviso.hidden = false;
-        aviso.textContent = "Sin conexión a la base: no se guardó, pero te abrimos Instagram igual.";
+        aviso.textContent = "No se pudo guardar la reserva. Te abrimos Instagram para coordinar.";
       }
       window.open(`https://instagram.com/${mesaActual.publica.instagram}`, "_blank", "noopener");
       if (btn) { btn.disabled = false; btn.textContent = "Reservar mesa"; }
       return;
     }
-    if (aviso) { aviso.hidden = false; aviso.textContent = `No se pudo reservar: ${e.message}`; }
     if (btn) { btn.disabled = false; btn.textContent = "Reservar mesa"; }
     await cargarMesas(diaSeleccionado);
     if (mesaActual) mostrarInfo(mesaActual);
+    avisoReserva(`No se pudo reservar: ${e.message}`);
   }
 }
 
@@ -348,12 +354,18 @@ function mostrarInfo(m) {
       ${reservada ? "Mesa ya reservada para esa fecha" : "Reservar mesa"}
     </button>
     <p id="reservaAviso" class="reserva-aviso" hidden></p>
-    ${API_OK ? "" : `<p class="reserva-aviso reserva-aviso--off">Sin conexión a la base: la reserva solo abrirá Instagram.</p>`}
   `;
 
   infoMesaContentEl.querySelectorAll(".dia-btn").forEach((b) => {
     b.addEventListener("click", () => elegirDia(b.dataset.dia));
   });
+
+  // Si hay sesión, precargamos el nombre de la cuenta (el contacto lo completa
+  // la persona, porque puede ser celu o Instagram).
+  if (USUARIO) {
+    const nombreInput = document.getElementById("resNombre");
+    if (nombreInput) nombreInput.value = USUARIO.nombre_completo;
+  }
 
   const btnReservar = document.getElementById("btnReservar");
   if (btnReservar && puedeReservar) {
@@ -366,9 +378,6 @@ function setEditMode(on) {
   document.body.classList.toggle("edit-mode", on);
   if (btnEdit) btnEdit.textContent = on ? "✔ Terminar edición" : "⚙ Editar mapa";
   renderHotspots();
-  if (on && !mesaActual) {
-    setStatus("Modo edición: elegí una mesa y luego hacé click en el mapa para moverla", "");
-  }
 }
 
 function exportPosiciones() {
@@ -407,8 +416,11 @@ if (btnEdit) {
             for (const m of MESAS) pos[m.id] = [m.x, m.y];
             const r = await fetch("api/admin.php", {
               method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ key, action: "posiciones", posiciones: pos }),
+              headers: {
+                "Content-Type": "application/json",
+                "X-Admin-Key": key,
+              },
+              body: JSON.stringify({ action: "posiciones", posiciones: pos }),
             });
             const d = await r.json();
             if (!d.ok) throw new Error(d.error || "Error");
@@ -441,8 +453,23 @@ if (mapaEl) {
   });
 }
 
+async function cargarSesion() {
+  try {
+    const r = await fetch("api/auth/sesion.php", {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.ok && d.autenticado && d.usuario) USUARIO = d.usuario;
+  } catch (e) {
+    // Sin sesión (o sin base): se sigue como invitado.
+  }
+}
+
 (async function init() {
   renderHotspots();
+  await cargarSesion();
   await cargarFechas();
   await cargarMesas(null);
 })();

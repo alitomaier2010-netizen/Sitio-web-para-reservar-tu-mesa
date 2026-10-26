@@ -1,9 +1,19 @@
 <?php
 require_once __DIR__ . '/config.php';
 
+// Los errores de PHP van al log, nunca a la respuesta HTTP (no filtrar rutas
+// ni detalles internos del servidor).
+error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('log_errors', '1');
+
 function json_out($data, int $code = 200): void {
   http_response_code($code);
   header('Content-Type: application/json; charset=utf-8');
+  header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+  header('Pragma: no-cache');
+  header('X-Content-Type-Options: nosniff');
+  header('Referrer-Policy: no-referrer');
   echo json_encode($data, JSON_UNESCAPED_UNICODE);
   exit;
 }
@@ -72,7 +82,20 @@ function resolver_fecha(string $dia, ?string $fecha): string {
 }
 
 function check_admin(?string $key): void {
-  if ($key === null || !hash_equals(ADMIN_KEY, $key)) {
+  // Retardo fijo en cada intento fallido: encarece la fuerza bruta.
+  if ($key === null || ADMIN_KEY === '' || !hash_equals(ADMIN_KEY, $key)) {
+    usleep(400000);
     json_error('Clave admin incorrecta', 403);
   }
+}
+
+// La clave se acepta por header X-Admin-Key o en el body JSON.
+// NO se acepta más por ?key= para que no quede escrita en los logs de Apache.
+function admin_key(?array $body = null): ?string {
+  $header = $_SERVER['HTTP_X_ADMIN_KEY'] ?? null;
+  if (is_string($header) && $header !== '') return $header;
+  if (is_array($body) && isset($body['key']) && is_string($body['key']) && $body['key'] !== '') {
+    return $body['key'];
+  }
+  return null;
 }

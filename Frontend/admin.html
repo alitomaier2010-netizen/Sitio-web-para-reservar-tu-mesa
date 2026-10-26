@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
   <title>Non Stop · Admin reservas</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -20,7 +21,8 @@
       <div class="admin-row">
         <div class="admin-field">
           <label class="res-form__label" for="adminKey">Clave admin</label>
-          <input class="res-form__input" id="adminKey" type="password" placeholder="ADMIN_KEY de api/config.php" />
+          <input class="res-form__input" id="adminKey" type="password" autocomplete="off"
+                 placeholder="Clave de config.local.php" />
         </div>
         <div class="admin-field">
           <label class="res-form__label" for="adminEstado">Estado</label>
@@ -33,7 +35,7 @@
         </div>
         <button type="button" class="tool-btn" id="btnCargar">Cargar</button>
       </div>
-      <p class="api-status" id="adminStatus"></p>
+      <p class="admin__status" id="adminStatus"></p>
     </div>
 
     <div class="admin-card">
@@ -62,13 +64,27 @@
     const $ = (id) => document.getElementById(id);
     const fmt = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 
+    // Todo lo que viene de la base se escapa antes de entrar al HTML.
+    function esc(s) {
+      return String(s ?? "").replace(/[&<>"']/g, (c) => (
+        { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
+      ));
+    }
+
+    function clave() {
+      return $("adminKey").value.trim();
+    }
+
     async function cargar() {
-      const key = $("adminKey").value.trim();
+      const key = clave();
       const estado = $("adminEstado").value;
       if (!key) { $("adminStatus").textContent = "Escribí la clave admin."; return; }
       $("adminStatus").textContent = "Cargando...";
       try {
-        const r = await fetch(`api/admin.php?key=${encodeURIComponent(key)}&estado=${encodeURIComponent(estado)}`);
+        const r = await fetch(`api/admin.php?estado=${encodeURIComponent(estado)}`, {
+          cache: "no-store",
+          headers: { Accept: "application/json", "X-Admin-Key": key },
+        });
         const d = await r.json();
         if (!r.ok || !d.ok) throw new Error(d.error || "Error");
         $("adminStatus").textContent = `${d.reservas.length} reservas · Vie ${d.fechas.viernes} / Sáb ${d.fechas.sabado}`;
@@ -80,13 +96,16 @@
         }
         for (const res of d.reservas) {
           const tr = document.createElement("tr");
+          const cuenta = res.usuario_email
+            ? `<br><small>cuenta: ${esc(res.usuario_email)}</small>`
+            : `<br><small>sin cuenta</small>`;
           tr.innerHTML = `
-            <td>${res.id}</td>
-            <td><b>${res.mesa_id}</b><br><small>${res.sector} · ${res.dia}</small></td>
-            <td>${res.fecha_evento}</td>
-            <td><b>${res.cliente_nombre}</b><br><small>${res.cliente_contacto}</small></td>
+            <td>${Number(res.id)}</td>
+            <td><b>${esc(res.mesa_id)}</b><br><small>${esc(res.sector)} · ${esc(res.dia)}</small></td>
+            <td>${esc(res.fecha_evento)}</td>
+            <td><b>${esc(res.cliente_nombre)}</b><br><small>${esc(res.cliente_contacto)}</small>${cuenta}</td>
             <td>${fmt.format(res.precio_acordado)}${res.consumo_acordado != null ? `<br><small>cons ${fmt.format(res.consumo_acordado)}</small>` : ""}</td>
-            <td><span class="admin-badge admin-badge--${res.estado}">${res.estado}</span></td>
+            <td><span class="admin-badge admin-badge--${esc(res.estado)}">${esc(res.estado)}</span></td>
             <td><div class="admin-actions"></div></td>
           `;
           const box = tr.querySelector(".admin-actions");
@@ -109,11 +128,15 @@
       try {
         const r = await fetch("api/admin.php", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ key, id, estado }),
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            "X-Admin-Key": key,
+          },
+          body: JSON.stringify({ id, estado }),
         });
         const d = await r.json();
-        if (!d.ok) throw new Error(d.error || "Error");
+        if (!r.ok || !d.ok) throw new Error(d.error || "Error");
         cargar();
       } catch (e) {
         alert(`No se pudo actualizar: ${e.message}`);
@@ -121,6 +144,10 @@
     }
 
     $("btnCargar").addEventListener("click", cargar);
+    $("adminKey").addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter") cargar();
+    });
   </script>
+  <script src="estado.js" defer></script>
 </body>
 </html>

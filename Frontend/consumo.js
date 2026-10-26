@@ -8,7 +8,6 @@ const formatoARS = new Intl.NumberFormat("es-AR", {
   maximumFractionDigits: 0,
 });
 
-const statusEl = document.getElementById("apiStatus");
 const zonasEl = document.getElementById("listaZonas");
 const personasEl = document.getElementById("personas");
 const consumoEl = document.getElementById("consumo");
@@ -23,6 +22,7 @@ const formEl = document.getElementById("formConsumo");
 
 let ZONAS = [];
 let MAX_PERSONAS = 6;
+let USUARIO = null;
 
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => (
@@ -115,13 +115,26 @@ async function cargar() {
     pintarPersonas();
     pintarPagos(d.formas_pago);
     reglaEl.textContent = `Máximo ${MAX_PERSONAS} personas por consumo. No se aceptan grupos más grandes.`;
-
-    statusEl.textContent = `${ZONAS.length} zonas disponibles`;
-    statusEl.className = "api-status api-status--ok";
   } catch (e) {
-    statusEl.textContent = `No se pudieron cargar las zonas: ${e.message}`;
-    statusEl.className = "api-status api-status--off";
+    mostrarAviso("No se pudieron cargar las zonas. Recargá la página para volver a intentar.", "error");
     btnEl.disabled = true;
+  }
+}
+
+async function cargarSesion() {
+  try {
+    const r = await fetch("api/auth/sesion.php", {
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.ok && d.autenticado && d.usuario) {
+      USUARIO = d.usuario;
+      if (nombreEl && !nombreEl.value) nombreEl.value = USUARIO.nombre_completo;
+    }
+  } catch (e) {
+    // Sin sesión (o sin base): se sigue como invitado.
   }
 }
 
@@ -168,6 +181,8 @@ formEl.addEventListener("submit", async (ev) => {
     );
     formEl.reset();
     resumenEl.hidden = true;
+    // El reset borra el nombre precargado: si hay cuenta, lo volvemos a poner.
+    if (USUARIO && nombreEl) nombreEl.value = USUARIO.nombre_completo;
     window.open(d.instagram_url, "_blank", "noopener");
   } catch (e) {
     mostrarAviso(`No se pudo guardar: ${e.message}`, "error");
@@ -177,4 +192,5 @@ formEl.addEventListener("submit", async (ev) => {
   }
 });
 
+cargarSesion();
 cargar();

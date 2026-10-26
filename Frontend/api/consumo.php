@@ -8,7 +8,7 @@
 // No hay pago online: se registra el pedido y se devuelve un mensaje para
 // coordinar por contacto. El costo adicional es un TOTAL de la zona
 // (no se multiplica por la cantidad de personas).
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/session.php';
 
 const CONSUMO_MAX_PERSONAS = 6;
 
@@ -45,8 +45,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   json_error('Usá GET o POST', 405);
 }
 
+check_mismo_origen();
+
 $pdo = db();
 $b = body_json();
+
+$usuario = usuario_actual();
+$usuario_id = $usuario ? (int)$usuario['id'] : null;
 
 $zona_id     = (int)($b['zona_id'] ?? 0);
 $nombre      = trim((string)($b['persona_nombre'] ?? ''));
@@ -63,6 +68,9 @@ if (mb_strlen($nombre) < 2 || mb_strlen($nombre) > 100) {
 }
 if (mb_strlen($contacto) < 3 || mb_strlen($contacto) > 100) {
   json_error('Dejanos un contacto (celular o Instagram)');
+}
+if (preg_match('/[<>]/u', $nombre . $contacto)) {
+  json_error('El nombre o el contacto tienen caracteres no permitidos');
 }
 if ($personas < 1 || $personas > CONSUMO_MAX_PERSONAS) {
   json_error('Como maximo ' . CONSUMO_MAX_PERSONAS . ' personas por consumo');
@@ -83,6 +91,17 @@ if (!$d || $d->format('Y-m-d') !== $fecha_evento) {
   json_error('fecha_evento invalida, usa formato YYYY-MM-DD');
 }
 
+// Ventana razonable: ni noches pasadas ni pedidos a 5 años vista.
+if ($fecha_evento < date('Y-m-d')) {
+  json_error('Esa fecha ya pasó. Elegí una noche próxima.');
+}
+if ($fecha_evento > date('Y-m-d', strtotime('+365 days'))) {
+  json_error('Solo se puede sacar consumo con hasta un año de anticipación.');
+}
+
+// Freno anti-spam por IP o cuenta.
+rate_limit('consumo', $usuario['email'] ?? '', 6, 10, false);
+
 // Traemos la zona y calculamos el adicional en el servidor (nunca desde el cliente).
 $st = $pdo->prepare("
   SELECT id, nombre, consumo_adicional
@@ -101,11 +120,11 @@ $total = $consumo + $adicional;
 try {
   $st = $pdo->prepare("
     INSERT INTO consumos
-      (zona_id, fecha_evento, persona_nombre, persona_contacto, personas,
+      (usuario_id, zona_id, fecha_evento, persona_nombre, persona_contacto, personas,
        consumo_base, costo_adicional, total, estado)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')
   ");
-  $st->execute([$zona_id, $fecha_evento, $nombre, $contacto, $personas, $consumo, $adicional, $total]);
+  $st->execute([$usuario_id, $zona_id, $fecha_evento, $nombre, $contacto, $personas, $consumo, $adicional, $total]);
   $consumo_id = (int)$pdo->lastInsertId();
 } catch (PDOException $e) {
   json_error('Error guardando el consumo', 500);

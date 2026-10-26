@@ -2,6 +2,9 @@ CREATE DATABASE IF NOT EXISTS non_stop
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE non_stop;
 
+-- Esquema v4: cuentas de usuario (usuarios), control de intentos
+-- (auth_intentos) y vínculo opcional de reservas/consumos con la cuenta.
+
 CREATE TABLE sectores (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nombre VARCHAR(50) NOT NULL UNIQUE,
@@ -31,6 +34,37 @@ CREATE TABLE publicos (
   instagram VARCHAR(100) NOT NULL
 ) ENGINE=InnoDB;
 
+-- ---------------------------------------------------------------------------
+-- CUENTAS DE USUARIO
+-- La contraseña NUNCA se guarda en texto plano: password_hash() de PHP
+-- (bcrypt/argon2) devuelve un hash de ~60-255 caracteres.
+-- La cuenta es OPCIONAL: se puede reservar y sacar consumo sin registrarse.
+-- ---------------------------------------------------------------------------
+CREATE TABLE usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  email VARCHAR(190) NOT NULL,
+  nombre_completo VARCHAR(100) NOT NULL,
+  password_hash VARCHAR(255) NOT NULL,
+  rol ENUM('cliente','admin') NOT NULL DEFAULT 'cliente',
+  activo BOOLEAN NOT NULL DEFAULT TRUE,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ultimo_login DATETIME NULL,
+  UNIQUE KEY uq_email (email)
+) ENGINE=InnoDB;
+
+-- Intentos de login/registro para frenar fuerza bruta.
+-- Solo se guardan la IP y el email intentado, no la contraseña.
+CREATE TABLE auth_intentos (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  ip VARCHAR(45) NOT NULL,
+  email VARCHAR(190) NOT NULL DEFAULT '',
+  accion ENUM('login','registro','reserva','consumo') NOT NULL DEFAULT 'login',
+  exito BOOLEAN NOT NULL DEFAULT FALSE,
+  creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY idx_ip_fecha (ip, creado_en),
+  KEY idx_email_fecha (email, creado_en)
+) ENGINE=InnoDB;
+
 CREATE TABLE mesas (
   id VARCHAR(10) PRIMARY KEY,
   sector_id INT NOT NULL,
@@ -47,6 +81,7 @@ CREATE TABLE mesas (
 
 CREATE TABLE reservas (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NULL,
   mesa_id VARCHAR(10) NOT NULL,
   dia ENUM('viernes','sabado') NOT NULL,
   fecha_evento DATE NOT NULL,
@@ -57,8 +92,10 @@ CREATE TABLE reservas (
   estado ENUM('pendiente','confirmada','cancelada') NOT NULL DEFAULT 'pendiente',
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (mesa_id) REFERENCES mesas(id),
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
   UNIQUE KEY uq_mesa_fecha (mesa_id, fecha_evento),
-  KEY idx_fecha_estado (fecha_evento, estado)
+  KEY idx_fecha_estado (fecha_evento, estado),
+  KEY idx_usuario (usuario_id)
 ) ENGINE=InnoDB;
 
 INSERT INTO sectores (id, nombre, capacidad, vendible) VALUES
@@ -235,6 +272,7 @@ CREATE TABLE zonas_consumo (
 -- Consumos sacados. Máximo 6 personas por consumo (regla del boliche).
 CREATE TABLE consumos (
   id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NULL,
   zona_id INT NOT NULL,
   fecha_evento DATE NOT NULL,
   persona_nombre VARCHAR(100) NOT NULL,
@@ -246,7 +284,9 @@ CREATE TABLE consumos (
   estado ENUM('pendiente','confirmado','cancelado') NOT NULL DEFAULT 'pendiente',
   creado_en DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (zona_id) REFERENCES zonas_consumo(id),
-  KEY idx_fecha_estado (fecha_evento, estado)
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE SET NULL,
+  KEY idx_fecha_estado (fecha_evento, estado),
+  KEY idx_usuario (usuario_id)
 ) ENGINE=InnoDB;
 
 INSERT INTO zonas_consumo (sector_id, nombre, consumo_adicional, descripcion, activo) VALUES

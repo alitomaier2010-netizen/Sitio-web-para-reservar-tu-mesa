@@ -2,11 +2,12 @@
 // POST api/reservar.php
 // Body JSON: { mesa_id, dia, fecha_evento?, cliente_nombre, cliente_contacto }
 // Guarda la reserva y devuelve el mensaje para Instagram.
-require_once __DIR__ . '/db.php';
+require_once __DIR__ . '/session.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
   json_error('Usá POST', 405);
 }
+check_mismo_origen();
 
 $pdo = db();
 $b = body_json();
@@ -16,6 +17,9 @@ $dia = trim((string)($b['dia'] ?? ''));
 $fecha_in = trim((string)($b['fecha_evento'] ?? ''));
 $nombre = trim((string)($b['cliente_nombre'] ?? ''));
 $contacto = trim((string)($b['cliente_contacto'] ?? ''));
+
+$usuario = usuario_actual();
+$usuario_id = $usuario ? (int)$usuario['id'] : null;
 
 if ($mesa_id === '') {
   json_error('Falta mesa_id');
@@ -43,8 +47,31 @@ if (mb_strlen($nombre) < 2 || mb_strlen($nombre) > 100) {
 if (mb_strlen($contacto) < 3 || mb_strlen($contacto) > 100) {
   json_error('Dejanos un contacto (celular o Instagram)');
 }
+if (preg_match('/[<>]/u', $nombre . $contacto)) {
+  json_error('El nombre o el contacto tienen caracteres no permitidos');
+}
 
 $fecha_evento = resolver_fecha($dia, $fecha_in === '' ? null : $fecha_in);
+
+// Ventana razonable: ni fechas pasadas ni reservas a 5 años vista.
+$hoy = date('Y-m-d');
+if ($fecha_evento < $hoy) {
+  json_error('Esa fecha ya pasó. Elegí el próximo viernes o sábado.');
+}
+if ($fecha_evento > date('Y-m-d', strtotime('+365 days'))) {
+  json_error('Solo se puede reservar con hasta un año de anticipación.');
+}
+$nd = (int)DateTime::createFromFormat('Y-m-d', $fecha_evento)->format('N');
+$diaDeFecha = $nd === 5 ? 'viernes' : ($nd === 6 ? 'sabado' : '');
+if ($diaDeFecha === '') {
+  json_error('Solo se reservan mesas para viernes o sábado');
+}
+if ($diaDeFecha !== $dia) {
+  json_error('La fecha elegida no es ' . $dia);
+}
+
+// Freno anti-spam: una misma IP o cuenta no puede bloquear el mapa entero.
+rate_limit('reserva', $usuario['email'] ?? '', 6, 10, false);
 
 try {
   $pdo->beginTransaction();
@@ -105,21 +132,21 @@ try {
     // Reutilizamos la fila cancelada (respeta UNIQUE mesa+fecha)
     $st = $pdo->prepare("
       UPDATE reservas
-      SET dia = ?, cliente_nombre = ?, cliente_contacto = ?,
+      SET usuario_id = ?, dia = ?, cliente_nombre = ?, cliente_contacto = ?,
           precio_acordado = ?, consumo_acordado = ?, estado = 'pendiente',
           creado_en = NOW()
       WHERE id = ?
     ");
-    $st->execute([$dia, $nombre, $contacto, $pr['precio'], $pr['consumo'], $exist['id']]);
+    $st->execute([$usuario_id, $dia, $nombre, $contacto, $pr['precio'], $pr['consumo'], $exist['id']]);
     $reserva_id = (int)$exist['id'];
   } else {
     $st = $pdo->prepare("
       INSERT INTO reservas
-        (mesa_id, dia, fecha_evento, cliente_nombre, cliente_contacto,
+        (usuario_id, mesa_id, dia, fecha_evento, cliente_nombre, cliente_contacto,
          precio_acordado, consumo_acordado, estado)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente')
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendiente')
     ");
-    $st->execute([$mesa_id, $dia, $fecha_evento, $nombre, $contacto, $pr['precio'], $pr['consumo']]);
+    $st->execute([$usuario_id, $mesa_id, $dia, $fecha_evento, $nombre, $contacto, $pr['precio'], $pr['consumo']]);
     $reserva_id = (int)$pdo->lastInsertId();
   }
 

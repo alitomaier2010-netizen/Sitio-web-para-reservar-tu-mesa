@@ -1,0 +1,8 @@
+# Secretos locales (contraseña de MySQL y clave admin)
+Frontend/api/config.local.php
+
+# Archivos temporales / del sistema
+Thumbs.db
+desktop.ini
+*.log
+*.tmp

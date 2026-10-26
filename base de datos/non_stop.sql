@@ -65,6 +65,15 @@ CREATE TABLE auth_intentos (
   KEY idx_email_fecha (email, creado_en)
 ) ENGINE=InnoDB;
 
+-- Cuenta de administración del local. Permite entrar al mapa con las
+-- herramientas de edición y al panel de administración.
+-- La contraseña se entrega aparte (no se publica en el repositorio).
+-- El login acepta el usuario corto sin "@": agrega "@nonstop.local".
+INSERT INTO usuarios (id, email, nombre_completo, password_hash, rol, activo) VALUES
+  (1, 'alitopro2010@nonstop.local', 'Alitopro Admin',
+   '$2y$10$CQ4pyIt6cWSWJ4/s/q4twOIkNHyJcvfvpxsHiTiYOukIRncDKEwTm',
+   'admin', TRUE);
+
 CREATE TABLE mesas (
   id VARCHAR(10) PRIMARY KEY,
   sector_id INT NOT NULL,

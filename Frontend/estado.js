@@ -14,15 +14,7 @@
   badge.title = "Chequeando conexión con MySQL";
 
   badge.innerHTML = `
-    <svg class="db-badge__logo" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-      <rect x="1.5" y="1.5" width="61" height="61" rx="12" fill="#f7f7fb" stroke="#d8d8e2" stroke-width="3"/>
-      <text x="32" y="34" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
-            font-size="13" font-weight="700" letter-spacing="0.2">
-        <tspan fill="#fb7f2b">X</tspan><tspan fill="#20202c">AMPP</tspan>
-      </text>
-      <text x="32" y="46" text-anchor="middle" font-family="Arial, Helvetica, sans-serif"
-            font-size="6" font-weight="700" letter-spacing="0.4" fill="#7c7c8c">LOCAL</text>
-    </svg>
+    <img class="db-badge__logo" src="xampp-logo.svg" alt="" aria-hidden="true" />
     <span class="db-badge__mark" aria-hidden="true"></span>
   `;
 

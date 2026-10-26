@@ -18,6 +18,22 @@ let USUARIO = null;
 let VISTA = "login";
 let ultimoFoco = null;
 
+// Recuerda que la persona eligió "continuar sin cuenta" para que, al volver
+// desde el mapa a la portada, vea otra vez los 3 botones y no el login.
+const INVITADO_KEY = "ns_invitado";
+
+function marcarInvitado() {
+  try { sessionStorage.setItem(INVITADO_KEY, "1"); } catch (e) {}
+}
+
+function limpiarInvitado() {
+  try { sessionStorage.removeItem(INVITADO_KEY); } catch (e) {}
+}
+
+function esInvitado() {
+  try { return sessionStorage.getItem(INVITADO_KEY) === "1"; } catch (e) { return false; }
+}
+
 function esc(s) {
   return String(s ?? "").replace(/[&<>"']/g, (c) => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]
@@ -48,6 +64,9 @@ function mostrarVista(vista) {
 function entrarAlSitio(usuario) {
   USUARIO = usuario || null;
 
+  if (USUARIO) limpiarInvitado();
+  else marcarInvitado();
+
   cargandoEl.hidden = true;
   accesoEl.hidden = true;
   menuEl.hidden = false;
@@ -64,6 +83,7 @@ function entrarAlSitio(usuario) {
 
 function volverAlAcceso(mensaje) {
   USUARIO = null;
+  limpiarInvitado();
   cargandoEl.hidden = true;
   menuEl.hidden = true;
   sesionEl.hidden = true;
@@ -237,6 +257,11 @@ btnSesionEl.addEventListener("click", async () => {
     }
   } catch (e) {
     // Si la base no responde, la portada igual deja seguir sin cuenta.
+  }
+  // Si ya había elegido "continuar sin cuenta", vuelve directo a los 3 botones.
+  if (esInvitado()) {
+    entrarAlSitio(null);
+    return;
   }
   cargandoEl.hidden = true;
   accesoEl.hidden = false;

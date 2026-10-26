@@ -465,6 +465,12 @@ async function cargarSesion() {
   } catch (e) {
     // Sin sesión (o sin base): se sigue como invitado.
   }
+  // Las herramientas de administración (editar mapa / panel admin) solo se
+  // muestran para cuentas con rol admin. Sin cuenta o cuenta cliente: solo "Volver".
+  const adminTools = document.getElementById("adminTools");
+  if (adminTools && USUARIO && USUARIO.rol === "admin") {
+    adminTools.hidden = false;
+  }
 }
 
 (async function init() {

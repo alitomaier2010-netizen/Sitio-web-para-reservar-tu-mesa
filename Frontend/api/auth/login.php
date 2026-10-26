@@ -11,6 +11,11 @@ check_mismo_origen();
 
 $b = body_json();
 $email = mb_strtolower(trim((string)($b['email'] ?? '')));
+// Además del correo completo, aceptamos el usuario corto de la cuenta admin
+// (por ejemplo "alitopro2010" en vez de "alitopro2010@nonstop.local").
+if ($email !== '' && strpos($email, '@') === false) {
+  $email .= '@nonstop.local';
+}
 $pass = (string)($b['password'] ?? '');
 
 if ($email === '' || $pass === '') {
